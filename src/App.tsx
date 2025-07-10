@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TodoItem from "./TodoItem";
 
 type Priority = "Urgente" | "Moyenne" | "Basse";
 
@@ -44,6 +45,15 @@ if (filter === "Tous") {
 } else {
   filteredTodos = todos.filter((todo) => todo.priority === filter);
 }
+  const urgentCount = todos.filter((t) => t.priority === "Urgente").length;
+  const mediumCount = todos.filter((t) => t.priority === "Moyenne").length;
+  const lowCount = todos.filter((t) => t.priority === "Basse").length;
+  const totalCount = todos.length;
+
+  const deleteTodo = (id: number) => {
+    const newTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(newTodos);
+  };
   return (
     <div className="flex justify-center">
       <div className="w-2/3 flex flex-col gap-4 my-16 bg-base-300 p-5 rounded-2xl">
@@ -72,13 +82,23 @@ if (filter === "Tous") {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setFilter("Tous")}
-              className={`btn btn-soft ${filter === "Tous" ? "bg-cyan-600 text-gray-900" : ""}`}>Tous</button>
+              className={`btn btn-soft ${filter === "Tous" ? "bg-cyan-600 text-gray-900" : ""}`}
+            >Tous ({totalCount})
+            </button>
+
+            <button
+              onClick={() => setFilter("Urgente")}
+              className={`btn btn-soft ${filter === "Urgente" ? "bg-cyan-600 text-gray-900" : ""}`}
+            >Urgente ({urgentCount})
+            </button>
+
             <button  onClick={() => setFilter("Moyenne")}
               className={`btn btn-soft ${filter === "Moyenne" ? "bg-cyan-600 text-gray-900" : ""}`}
-              >Moyenne</button>
+            >Moyenne ({mediumCount})</button>
+            
             <button  onClick={() => setFilter("Basse")}
               className={`btn btn-soft ${filter === "Basse" ? "bg-cyan-600 text-gray-900" : ""}`}
-            >Basse</button>
+            >Basse ({lowCount})</button>
             
           </div>
           {filteredTodos.length > 0 ? (
@@ -87,14 +107,14 @@ if (filter === "Tous") {
               <ul className="divide-y divide-primary/20">
                 {filteredTodos.map((todo) => (
                   <li key={todo.id} className="flex gap-4">
-                    {todo}
+                    <TodoItem todo={todo}  />
                   </li>
                 ))}
                 </ul>
               </div>
           ): (
               <div className = "">
-                test2
+                Aucune tache disponible
               </div>
             )}
         </div>
