@@ -172,7 +172,7 @@ const App = () => {
           )}
         </div>
       <footer className="text-center text-sm text-gray-400 mt-10">
-  © {new Date().getFullYear()} frankamdev · 📞 +237 690 46 18 30
+  © {new Date().getFullYear()} frankamdev · 📞  690 46 18 30 
 </footer>
       </div>
 
