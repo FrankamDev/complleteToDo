@@ -13,6 +13,9 @@ type Todo = {
 const App = () => {
   const [input, setInput] = useState<string>("");
   const [priority, setPriority] = useState<Priority>("Moyenne");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
+
   const savedTodos = localStorage.getItem("todos");
   const initialTodos = savedTodos ? JSON.parse(savedTodos) : [];
 
@@ -29,29 +32,38 @@ const App = () => {
       return alert("Saisis une tâche bro!!");
     }
 
-    const newTodo: Todo = {
-      id: Date.now(),
-      text: input.trim(),
-      priority: priority,
-    };
+    if (isEditing && editingTodoId !== null) {
+      const updatedTodos = todos.map((todo) =>
+        todo.id === editingTodoId ? { ...todo, text: input.trim(), priority } : todo
+      );
+      setTodos(updatedTodos);
+      setIsEditing(false);
+      setEditingTodoId(null);
+    } else {
+      const newTodo: Todo = {
+        id: Date.now(),
+        text: input.trim(),
+        priority: priority,
+      };
 
-    setTodos([newTodo, ...todos]);
+      const newTodos = [newTodo, ...todos];
+      setTodos(newTodos);
+    }
+
     setInput("");
     setPriority("Moyenne");
   };
 
-  const filteredTodos =
-    filter === "Tous"
-      ? todos
-      : todos.filter((todo) => todo.priority === filter);
-
-  const urgentCount = todos.filter((t) => t.priority === "Urgente").length;
-  const mediumCount = todos.filter((t) => t.priority === "Moyenne").length;
-  const lowCount = todos.filter((t) => t.priority === "Basse").length;
-  const totalCount = todos.length;
+  const handleEdit = (todo: Todo) => {
+    setInput(todo.text);
+    setPriority(todo.priority);
+    setIsEditing(true);
+    setEditingTodoId(todo.id);
+  };
 
   const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+    const newTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(newTodos);
   };
 
   const toggleTodo = (id: number) => {
@@ -61,15 +73,25 @@ const App = () => {
   };
 
   const finished = () => {
-    setTodos(todos.filter((todo) => !selectedTodos.has(todo.id)));
+    const newTodos = todos.filter((todo) => !selectedTodos.has(todo.id));
+    setTodos(newTodos);
     setSelectedTodos(new Set());
   };
 
+  const urgentCount = todos.filter((t) => t.priority === "Urgente").length;
+  const mediumCount = todos.filter((t) => t.priority === "Moyenne").length;
+  const lowCount = todos.filter((t) => t.priority === "Basse").length;
+  const totalCount = todos.length;
+
+  const filteredTodos =
+    filter === "Tous"
+      ? todos
+      : todos.filter((todo) => todo.priority === filter);
+
   return (
-    <div className="flex justify-center px-4 sm:px-6 md:px-10">
-      <div className="w-full max-w-3xl flex flex-col gap-6 my-10 sm:my-16 bg-base-200 p-5 sm:p-8 rounded-2xl shadow-md">
-        
-        <div className="flex flex-col sm:flex-row gap-3">
+    <div className="flex justify-center px-4">
+      <div className="w-full max-w-3xl flex flex-col gap-4 my-10 bg-base-300 p-5 rounded-2xl shadow-md">
+        <div className="flex flex-col sm:flex-row gap-4">
           <input
             type="text"
             className="input w-full"
@@ -86,82 +108,69 @@ const App = () => {
             <option value="Moyenne">Moyenne</option>
             <option value="Basse">Peu urgente</option>
           </select>
-          <button
-            onClick={addTodo}
-            className="btn btn-primary w-full sm:w-auto"
-          >
-            Ajouter
+          <button onClick={addTodo} className="btn btn-primary w-full sm:w-auto">
+            {isEditing ? "Modifier" : "Ajouter"}
           </button>
         </div>
 
-      
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setFilter("Tous")}
+                className={`btn btn-soft ${filter === "Tous" ? "bg-cyan-600 text-gray-900" : ""}`}
+              >
+                Tous ({totalCount})
+              </button>
+              <button
+                onClick={() => setFilter("Urgente")}
+                className={`btn btn-soft ${filter === "Urgente" ? "bg-cyan-600 text-gray-900" : ""}`}
+              >
+                Urgente ({urgentCount})
+              </button>
+              <button
+                onClick={() => setFilter("Moyenne")}
+                className={`btn btn-soft ${filter === "Moyenne" ? "bg-cyan-600 text-gray-900" : ""}`}
+              >
+                Moyenne ({mediumCount})
+              </button>
+              <button
+                onClick={() => setFilter("Basse")}
+                className={`btn btn-soft ${filter === "Basse" ? "bg-cyan-600 text-gray-900" : ""}`}
+              >
+                Basse ({lowCount})
+              </button>
+            </div>
+
             <button
-              onClick={() => setFilter("Tous")}
-              className={`btn btn-sm sm:btn-md btn-soft ${
-                filter === "Tous" ? "bg-cyan-600 text-white" : ""
-              }`}
+              disabled={selectedTodos.size === 0}
+              className="btn btn-primary"
+              onClick={finished}
             >
-              Tous ({totalCount})
-            </button>
-            <button
-              onClick={() => setFilter("Urgente")}
-              className={`btn btn-sm sm:btn-md btn-soft ${
-                filter === "Urgente" ? "bg-red-500 text-white" : ""
-              }`}
-            >
-              Urgente ({urgentCount})
-            </button>
-            <button
-              onClick={() => setFilter("Moyenne")}
-              className={`btn btn-sm sm:btn-md btn-soft ${
-                filter === "Moyenne" ? "bg-yellow-500 text-white" : ""
-              }`}
-            >
-              Moyenne ({mediumCount})
-            </button>
-            <button
-              onClick={() => setFilter("Basse")}
-              className={`btn btn-sm sm:btn-md btn-soft ${
-                filter === "Basse" ? "bg-green-500 text-white" : ""
-              }`}
-            >
-              Basse ({lowCount})
+              Finir la section ({selectedTodos.size})
             </button>
           </div>
 
-          <button
-            disabled={selectedTodos.size === 0}
-            onClick={finished}
-            className={`btn btn-primary transition-all duration-200 ${
-              selectedTodos.size === 0 ? "btn-disabled opacity-50" : ""
-            }`}
-          >
-            Finir ({selectedTodos.size})
-          </button>
+          {filteredTodos.length > 0 ? (
+            <ul className="divide-y divide-primary/20">
+              {filteredTodos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  isSelected={selectedTodos.has(todo.id)}
+                  onDelete={deleteTodo}
+                  onToggleSelect={toggleTodo}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </ul>
+          ) : (
+            <div className="flex flex-col justify-center items-center py-10">
+              <Construction className="w-20 h-10 text-primary" />
+              <span className="text-sm font-bold">Aucune tâche à faire</span>
+            </div>
+          )}
         </div>
-
-       
-        {filteredTodos.length > 0 ? (
-          <ul className="space-y-3">
-            {filteredTodos.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                onEdit={editTodo}
-                todo={todo}
-                isSelected={selectedTodos.has(todo.id)}
-                onDelete={deleteTodo}
-                onToggleSelect={toggleTodo}
-              />
-            ))}
-          </ul>
-        ) : (
-          <div className="flex flex-col items-center text-center mt-10 text-base-content/70">
-            <Construction className="w-16 h-16 text-primary mb-3" />
-            <span className="font-semibold">Aucune tâche pour le moment</span>
-          </div>
-        )}
       </div>
     </div>
   );
