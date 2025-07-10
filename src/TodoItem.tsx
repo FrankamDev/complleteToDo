@@ -10,21 +10,23 @@ type Todo = {
 
 type Props = {
   todo: Todo;
-
+  onDelete: (id: number) => void;
+  isSelected: boolean;
+  onToggleSelect: (id: number) => void;
 };
 
-const TodoItem = ({ todo }: Props) => {
+const TodoItem = ({ todo, onDelete, isSelected, onToggleSelect }: Props) => {
   return (
-    <li className="p-3">
-      <div className="flex justify-between items-center">
+    <li>
+      <div className="p-3 flex justify-between items-center">
         <div className="flex gap-2 items-center">
           <input
             type="checkbox"
+            checked={isSelected}
             className="checkbox checkbox-primary checkbox-sm"
+            onChange={() => onToggleSelect(todo.id)}
           />
-          <span className="text-md font-bold">
-            <span>{todo.text}</span>
-          </span>
+          <span className="text-md font-bold">{todo.text}</span>
           <span
             className={`badge badge-sm badge-soft ${
               todo.priority === "Urgente"
