@@ -35,19 +35,15 @@ const App = () => {
       priority: priority,
     };
 
-    const newTodos = [newTodo, ...todos];
-    setTodos(newTodos);
+    setTodos([newTodo, ...todos]);
     setInput("");
     setPriority("Moyenne");
-    console.log(newTodos);
   };
 
-  let filteredTodos: Todo[] = [];
-  if (filter === "Tous") {
-    filteredTodos = todos;
-  } else {
-    filteredTodos = todos.filter((todo) => todo.priority === filter);
-  }
+  const filteredTodos =
+    filter === "Tous"
+      ? todos
+      : todos.filter((todo) => todo.priority === filter);
 
   const urgentCount = todos.filter((t) => t.priority === "Urgente").length;
   const mediumCount = todos.filter((t) => t.priority === "Moyenne").length;
@@ -55,29 +51,25 @@ const App = () => {
   const totalCount = todos.length;
 
   const deleteTodo = (id: number) => {
-    const newTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(newTodos);
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
-const toggleTodo = (id: number) => {
-  const newSelected = new Set(selectedTodos);
-  if (newSelected.has(id)) {
-    newSelected.delete(id);
-  } else {
-    newSelected.add(id);
-  }
-  setSelectedTodos(newSelected);
-};
+  const toggleTodo = (id: number) => {
+    const newSelected = new Set(selectedTodos);
+    newSelected.has(id) ? newSelected.delete(id) : newSelected.add(id);
+    setSelectedTodos(newSelected);
+  };
 
   const finished = () => {
-    const newTodos = todos.filter((todo) => !selectedTodos.has(todo.id));
-    setTodos(newTodos);
+    setTodos(todos.filter((todo) => !selectedTodos.has(todo.id)));
     setSelectedTodos(new Set());
   };
+
   return (
-    <div className="flex justify-center">
-      <div className="w-2/3 flex flex-col gap-4 my-16 bg-base-300 p-5 rounded-2xl">
-        <div className="flex gap-4">
+    <div className="flex justify-center px-4 sm:px-6 md:px-10">
+      <div className="w-full max-w-3xl flex flex-col gap-6 my-10 sm:my-16 bg-base-200 p-5 sm:p-8 rounded-2xl shadow-md">
+        
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             className="input w-full"
@@ -88,84 +80,88 @@ const toggleTodo = (id: number) => {
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as Priority)}
-            className="select w-full"
+            className="select w-full sm:max-w-xs"
           >
             <option value="Urgente">Urgente</option>
             <option value="Moyenne">Moyenne</option>
             <option value="Basse">Peu urgente</option>
           </select>
-          <button onClick={addTodo} className="btn btn-primary">
+          <button
+            onClick={addTodo}
+            className="btn btn-primary w-full sm:w-auto"
+          >
             Ajouter
           </button>
         </div>
 
-        <div className="space-y-2 flex-1 h-fit">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-wrap gap-4">
+      
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilter("Tous")}
-              className={`btn btn-soft ${
-                filter === "Tous" ? "bg-cyan-600 text-gray-900" : ""
+              className={`btn btn-sm sm:btn-md btn-soft ${
+                filter === "Tous" ? "bg-cyan-600 text-white" : ""
               }`}
             >
               Tous ({totalCount})
             </button>
-
             <button
               onClick={() => setFilter("Urgente")}
-              className={`btn btn-soft ${
-                filter === "Urgente" ? "bg-cyan-600 text-gray-900" : ""
+              className={`btn btn-sm sm:btn-md btn-soft ${
+                filter === "Urgente" ? "bg-red-500 text-white" : ""
               }`}
             >
               Urgente ({urgentCount})
             </button>
-
             <button
               onClick={() => setFilter("Moyenne")}
-              className={`btn btn-soft ${
-                filter === "Moyenne" ? "bg-cyan-600 text-gray-900" : ""
+              className={`btn btn-sm sm:btn-md btn-soft ${
+                filter === "Moyenne" ? "bg-yellow-500 text-white" : ""
               }`}
             >
               Moyenne ({mediumCount})
             </button>
-
             <button
               onClick={() => setFilter("Basse")}
-              className={`btn btn-soft ${
-                filter === "Basse" ? "bg-cyan-600 text-gray-900" : ""
+              className={`btn btn-sm sm:btn-md btn-soft ${
+                filter === "Basse" ? "bg-green-500 text-white" : ""
               }`}
             >
               Basse ({lowCount})
             </button>
           </div>
-            <button disabled={selectedTodos.size === 0}
-              className="btn btn-primary"
-              onClick={finished}
-            >Finir la section ({selectedTodos.size})</button>
-          </div>
 
-          {filteredTodos.length > 0 ? (
-            <div>
-              <ul className="divide-y divide-primary/20">
-                {filteredTodos.map((todo) => (
-                  <li key={todo.id} className="flex gap-4">
-                    <TodoItem
-                      isSelected={selectedTodos.has(todo.id)}
-                      todo={todo}
-                      onDelete={deleteTodo}
-                      onToggleSelect={toggleTodo}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="flex flex-col justify-center items-center">
-              <Construction className="w-40 h-10 text-primary" />
-              <span className="text-sm font-bold">Aucune tâche à faire</span>
-            </div>
-          )}
+          <button
+            disabled={selectedTodos.size === 0}
+            onClick={finished}
+            className={`btn btn-primary transition-all duration-200 ${
+              selectedTodos.size === 0 ? "btn-disabled opacity-50" : ""
+            }`}
+          >
+            Finir ({selectedTodos.size})
+          </button>
         </div>
+
+       
+        {filteredTodos.length > 0 ? (
+          <ul className="space-y-3">
+            {filteredTodos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                onEdit={editTodo}
+                todo={todo}
+                isSelected={selectedTodos.has(todo.id)}
+                onDelete={deleteTodo}
+                onToggleSelect={toggleTodo}
+              />
+            ))}
+          </ul>
+        ) : (
+          <div className="flex flex-col items-center text-center mt-10 text-base-content/70">
+            <Construction className="w-16 h-16 text-primary mb-3" />
+            <span className="font-semibold">Aucune tâche pour le moment</span>
+          </div>
+        )}
       </div>
     </div>
   );
