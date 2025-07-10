@@ -1,12 +1,25 @@
-import { Home } from 'lucide-react';
 
-function MonComposant() {
+
+type Priority = "Urgente" | "Moyenne" | "Peu Importante";
+
+type Todo = {
+  id: number;
+  text: string;
+  priority: Priority;
+}
+const App = () => {
   return (
-    <div>
-      <h1>Accueil</h1>
-      <Home size={32} className='text-red-200' />
+    <div className=" flex justify-center">
+      <div className="w-2/3 flex flex-col gap-4 bg-base-300 p-5 rounded-2xl">
+        <div className="flex gap-4">
+          <input
+            type="text"
+          className="input input-bordered w-full"
+          />
+      </div>
+      </div>
     </div>
-  );
+  )
 }
 
-export default MonComposant;
+export default App
