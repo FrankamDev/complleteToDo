@@ -14,7 +14,9 @@ const App = () => {
   const [input, setInput] = useState<string>("");
   const [priority, setPriority] = useState<Priority>("Moyenne");
   const [isEditing, setIsEditing] = useState(false);
+
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
+
 
   const savedTodos = localStorage.getItem("todos");
   const initialTodos = savedTodos ? JSON.parse(savedTodos) : [];
